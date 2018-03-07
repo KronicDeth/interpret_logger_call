@@ -1,21 +1,63 @@
 # InterpretLoggerCall
 
-**TODO: Add description**
+A bug reproduction repo
 
-## Installation
+## Bug description
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `interpret_logger_call` to your list of dependencies in `mix.exs`:
+Logger calls (such as `Logger.info`) that take an anonymous function that contains a string that performs interpolation
+cannot be debugged using `:debugger`, IntelliJ Elixir or the Elixir Language Server that all use the `:int` OTP module
+to interpret modules to perform line-based debugging.
 
-```elixir
-def deps do
-  [
-    {:interpret_logger_call, "~> 0.1.0"}
-  ]
-end
+Logger calls containing interpolation raise an `ArgumentError` when the module is interpreted.
+
+## Bug reproduction
+
+### Without interpretation
+
+No bug when code is not interpreted
+
+```
+mix test
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/interpret_logger_call](https://hexdocs.pm/interpret_logger_call).
+outputs
 
+```
+..
+22:22:40.708 [info]  1
+.
+22:22:40.708 [info]  1
+.
+
+Finished in 0.02 seconds
+4 tests, 0 failures
+```
+
+### With interpretation
+
+Bug when code is interpreted
+
+```
+INT=1 mix test
+```
+
+outputs
+
+
+```
+..
+22:22:47.931 [info]  1
+
+
+  1) test log_interpolation/0 (InterpretLoggerCallTest)
+     test/interpret_logger_call_test.exs:18
+     ** (ArgumentError) argument error
+     stacktrace:
+       (interpret_logger_call) Elixir.InterpretLoggerCall.erl:17: anonymous fn/4 in InterpretLoggerCall.log_interpolation/0
+       (interpret_logger_call) Elixir.InterpretLoggerCall.erl:17: InterpretLoggerCall.log_interpolation/0
+
+.
+
+Finished in 0.05 seconds
+4 tests, 1 failure
+```

@@ -1,18 +1,27 @@
 defmodule InterpretLoggerCall do
-  @moduledoc """
-  Documentation for InterpretLoggerCall.
-  """
+  require Logger
 
-  @doc """
-  Hello world.
+  def fn_interpolation do
+    (fn -> a = 1; "#{a}" end).()
 
-  ## Examples
+    :ok
+  end
 
-      iex> InterpretLoggerCall.hello
-      :world
+  def fn_to_string do
+    (fn -> a = 1; to_string(a) end).()
 
-  """
-  def hello do
-    :world
+    :ok
+  end
+
+  def log_interpolation do
+    Logger.info(fn -> a = 1; "#{a}" end)
+
+    :ok
+  end
+
+  def log_to_string do
+    Logger.info(fn -> a = 1; to_string(a) end)
+
+    :ok
   end
 end
